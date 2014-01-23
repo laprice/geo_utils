@@ -21,6 +21,7 @@ def as_point(p):
 
 if __name__=='__main__':
     api_key = get_api_key()
+    print "got key: %s" % api_key
     db = get_db('host=localhost port=5433 dbname=bikewillamette')
 
     cursor = db.cursor()
@@ -30,9 +31,12 @@ if __name__=='__main__':
     addrs = cursor.fetchall()
     addr_locations = [ (a[0],"mapquest", as_point(g.geocode(a[1])[1])) 
                        for a in addrs ]
+    print "collected %d addresses on round1" % len(addr_locations)
     cursor.executemany(
         """insert into supporter_points (supporter_id,geocoder,location) values( %s, %s, ST_GeomFromText(%s, 4326);""", addr_locations) 
     db.commit()
+    with open('round1.csv','w') as fd:
+        fd.writelines(addr_locations)
     print "round 1 finished"
 
     #round 2
@@ -42,10 +46,13 @@ if __name__=='__main__':
     addrs = cursor.fetchall()
     addr_locations = [ (a[0],"mapquest", as_point(g.geocode(a[1])[1])) 
                        for a in addrs ]
+    print "collected %d addresses on round2" % len(addr_locations)
     cursor.executemany(
         """insert into supporter_points (supporter_id,geocoder,location)
         values( %s, %s, ST_GeomFromText(%s, 4326));""", addr_locations) 
     db.commit()
+    with open('round2.csv','w') as fd:
+        fd.writelines(addr_locations)
     db.close()
     print "round 2 finished"
     
