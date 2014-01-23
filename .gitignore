@@ -1,0 +1,7 @@
+*.csv
+.credentials
+*.tgz
+*.sql
+*.pyc
+*~
+*.qgs
